@@ -10,8 +10,8 @@ Each folder or script here corresponds to a specific tutorial video. Follow alon
 
 ## 📁 Repository Structure
 
-/pyspark-tutorials/
-/data/
+Contains all notebooks corresponding to vide
+This can be directly imported in databricks community edition
 
 
 ### Prerequisites
