@@ -1,0 +1,2238 @@
+{
+  "datasets": [
+    {
+      "name": "e19eb484",
+      "displayName": "lineitem",
+      "queryLines": [
+        "SELECT * FROM samples.tpch.lineitem"
+      ]
+    },
+    {
+      "name": "0e1906a1",
+      "displayName": "customer",
+      "queryLines": [
+        "SELECT *  FROM samples.tpch.customer"
+      ]
+    },
+    {
+      "name": "bef3e242",
+      "displayName": "nation",
+      "queryLines": [
+        "SELECT * FROM samples.tpch.nation where case when size(array_intersect(array(\"All\"),:country))=1  then n_name is not null else array_contains(:country,n_name)  end"
+      ],
+      "parameters": [
+        {
+          "displayName": "country",
+          "keyword": "country",
+          "dataType": "STRING",
+          "complexType": "MULTI",
+          "defaultSelection": {
+            "values": {
+              "dataType": "STRING",
+              "values": [
+                {
+                  "value": "All"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "73cc261a",
+      "displayName": "orders",
+      "queryLines": [
+        "SELECT * FROM samples.tpch.orders"
+      ]
+    },
+    {
+      "name": "c034b77b",
+      "displayName": "part",
+      "queryLines": [
+        "SELECT * FROM samples.tpch.part"
+      ]
+    },
+    {
+      "name": "f12143b8",
+      "displayName": "partsupp",
+      "queryLines": [
+        "SELECT * FROM samples.tpch.partsupp"
+      ]
+    },
+    {
+      "name": "c7c7f611",
+      "displayName": "region",
+      "queryLines": [
+        "SELECT * FROM samples.tpch.region"
+      ]
+    },
+    {
+      "name": "f8821e6f",
+      "displayName": "supplier",
+      "queryLines": [
+        "SELECT * FROM samples.tpch.supplier"
+      ]
+    },
+    {
+      "name": "0fbb3b60",
+      "displayName": "Country Revenue from Customer Orders",
+      "queryLines": [
+        "SELECT \r\n",
+        " initcap(lower( n.n_name)) AS country,\r\n",
+        "  SUM(l.l_extendedprice * (1 - l.l_discount)) AS revenue,\r\n",
+        "  count(distinct c_custkey) as customers,\r\n",
+        "  count(distinct l_suppkey) as suppliers\r\n",
+        "FROM samples.tpch.lineitem l\r\n",
+        "JOIN orders o ON l.l_orderkey = o.o_orderkey\r\n",
+        "JOIN customer c ON o.o_custkey = c.c_custkey\r\n",
+        "JOIN nation n ON c.c_nationkey = n.n_nationkey\r\n",
+        "GROUP BY country"
+      ],
+      "catalog": "samples",
+      "schema": "tpch"
+    },
+    {
+      "name": "237df8bc",
+      "displayName": "Regional Order Insights for Customer Demographics",
+      "queryLines": [
+        "select  year(o_orderdate) as order_year,* from customer c join \r\n",
+        "orders o  on c.c_custkey=o.o_custkey\r\n",
+        "join nation n on n.n_nationkey=c.c_nationkey\r\n",
+        "join region r on r.r_regionkey=n.n_regionkey\r\n",
+        "join lineitem l on l.l_orderkey=o.o_orderkey\r\n",
+        "--where   array_contains(:r_name,r_name) and array_contains(:n_name,n_name)\r\n",
+        "\r\n",
+        "--case when :r_name[0]=\"All\" then r_name is not null else array_contains(:r_name,r_name) end\r\n",
+        "-- and case when :n_name[0]=\"All\" then n_name is not null else  array_contains(:n_name,n_name) end\r\n",
+        "--AND \r\n",
+        "\r\n",
+        "-- CASE WHEN :order_yr=-1 then DATE_TRUNC(:date_granularity, o_orderdate) is not null when\r\n",
+        "-- :order_yr!=-1 and :order_month=-1 then if( year(order_dt) = :order_yr,DATE_TRUNC(:date_granularity, o_orderdate))\r\n",
+        "-- else\r\n",
+        "--  DATE_TRUNC(:date_granularity, o_orderdate) = date_trunc(:date_granularity,concat_ws(\"-\", :order_yr,:order_month,\"01\") ) end\r\n",
+        "\r\n",
+        "--Multi-select parameters are inserted into the query as an array. Example usage: array_contains(:parameter, field_name)"
+      ],
+      "columns": [
+        {
+          "displayName": "Revenue Total",
+          "description": "Total Revenue measure",
+          "expression": "sum(l_extendedprice)-SUM(l_discount)  "
+        }
+      ],
+      "catalog": "samples",
+      "schema": "tpch"
+    },
+    {
+      "name": "43a533db",
+      "displayName": "DATE_FILTERS",
+      "queryLines": [
+        "SELECT * FROM VALUES ('day'), ('week'), ('month'), ('year') AS t(date_granularity);\r\n",
+        "\r\n"
+      ],
+      "catalog": "samples",
+      "schema": "tpch"
+    },
+    {
+      "name": "e05b2e5e",
+      "displayName": "year_list",
+      "queryLines": [
+        "SELECT * FROM workspace.default.year_list"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "b82b1796",
+      "displayName": "Summary",
+      "layout": [
+        {
+          "widget": {
+            "name": "8f80376f",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "73cc261a",
+                  "fields": [
+                    {
+                      "name": "countdistinct(o_orderkey)",
+                      "expression": "COUNT(DISTINCT `o_orderkey`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "countdistinct(o_orderkey)",
+                  "displayName": "Count of Unique o_orderkey"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Total Orders"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 2,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "7936bf72",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f8821e6f",
+                  "fields": [
+                    {
+                      "name": "countdistinct(s_suppkey)",
+                      "expression": "COUNT(DISTINCT `s_suppkey`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "countdistinct(s_suppkey)",
+                  "displayName": "Count of Unique s_suppkey"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Total Suppliers\n",
+                "showDescription": true
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 0,
+            "width": 1,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "cab4efb2",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0e1906a1",
+                  "fields": [
+                    {
+                      "name": "countdistinct(c_custkey)",
+                      "expression": "COUNT(DISTINCT `c_custkey`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "countdistinct(c_custkey)",
+                  "displayName": "Count of Unique c_custkey"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Total Customer",
+                "showDescription": false
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 0,
+            "width": 1,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "657b0aa8",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "c7c7f611",
+                  "fields": [
+                    {
+                      "name": "countdistinct(r_regionkey)",
+                      "expression": "COUNT(DISTINCT `r_regionkey`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "countdistinct(r_regionkey)",
+                  "displayName": "Count of Unique r_regionkey"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Supplied Regions",
+                "showDescription": false
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 0,
+            "width": 1,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "e384523a",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "bef3e242",
+                  "fields": [
+                    {
+                      "name": "countdistinct(n_nationkey)",
+                      "expression": "COUNT(DISTINCT `n_nationkey`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "countdistinct(n_nationkey)",
+                  "displayName": "Count of Unique n_nationkey"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Supplied Countries",
+                "showDescription": false
+              }
+            }
+          },
+          "position": {
+            "x": 5,
+            "y": 0,
+            "width": 1,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "969cf393",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0fbb3b60",
+                  "fields": [
+                    {
+                      "name": "country",
+                      "expression": "`country`"
+                    },
+                    {
+                      "name": "revenue",
+                      "expression": "`revenue`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "choropleth-map",
+              "encodings": {
+                "color": {
+                  "fieldName": "country",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "country"
+                },
+                "extra": [
+                  {
+                    "fieldName": "revenue",
+                    "displayName": "revenue"
+                  }
+                ],
+                "region": {
+                  "regionType": "mapbox-v4-admin",
+                  "admin0": {
+                    "fieldName": "country",
+                    "type": "field",
+                    "geographicRole": "admin0-name",
+                    "displayName": "country"
+                  }
+                }
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 3,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "5bda76bb",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0fbb3b60",
+                  "fields": [
+                    {
+                      "name": "country",
+                      "expression": "`country`"
+                    },
+                    {
+                      "name": "customers",
+                      "expression": "`customers`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "choropleth-map",
+              "encodings": {
+                "color": {
+                  "fieldName": "country",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "country"
+                },
+                "extra": [
+                  {
+                    "fieldName": "customers",
+                    "format": {
+                      "type": "number-plain",
+                      "abbreviation": "compact",
+                      "decimalPlaces": {
+                        "type": "max",
+                        "places": 2
+                      }
+                    },
+                    "displayName": "customers"
+                  }
+                ],
+                "region": {
+                  "regionType": "mapbox-v4-admin",
+                  "admin0": {
+                    "fieldName": "country",
+                    "type": "field",
+                    "geographicRole": "admin0-name",
+                    "displayName": "country"
+                  }
+                }
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 3,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "8cdf7c7f",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "237df8bc",
+                  "fields": [
+                    {
+                      "name": "n_name",
+                      "expression": "`n_name`"
+                    },
+                    {
+                      "name": "r_name",
+                      "expression": "`r_name`"
+                    },
+                    {
+                      "name": "countdistinct(o_orderkey)",
+                      "expression": "COUNT(DISTINCT `o_orderkey`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "`r_name` IN (`r_name`) OR TRUE"
+                    },
+                    {
+                      "expression": "`n_name` IN (`n_name`) OR TRUE"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "r_name",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "r_name"
+                },
+                "y": {
+                  "fieldName": "countdistinct(o_orderkey)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Count of Unique o_orderkey"
+                },
+                "color": {
+                  "fieldName": "n_name",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "n_name"
+                }
+              },
+              "frame": {
+                "title": "Order Status Distribution",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 9,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "ab81588b",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "237df8bc",
+                  "fields": [
+                    {
+                      "name": "r_name",
+                      "expression": "`r_name`"
+                    },
+                    {
+                      "name": "n_name",
+                      "expression": "`n_name`"
+                    },
+                    {
+                      "name": "order_year",
+                      "expression": "`order_year`"
+                    },
+                    {
+                      "name": "measure(Revenue Total)",
+                      "expression": "MEASURE(`Revenue Total`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "`n_name` IN (`n_name`) OR TRUE"
+                    },
+                    {
+                      "expression": "`r_name` IN (`r_name`) OR TRUE"
+                    },
+                    {
+                      "expression": "`order_year` IN (`order_year`) OR TRUE"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "order_year",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "order_year"
+                },
+                "y": {
+                  "fieldName": "measure(Revenue Total)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Revenue Total"
+                },
+                "color": {
+                  "fieldName": "r_name",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "r_name"
+                },
+                "extra": [
+                  {
+                    "fieldName": "n_name",
+                    "displayName": "n_name"
+                  }
+                ]
+              },
+              "frame": {
+                "title": "Revenue Distribution",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 9,
+            "width": 3,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS"
+    },
+    {
+      "name": "cd8792cb",
+      "displayName": "Global Filters",
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS"
+    },
+    {
+      "name": "3caa1397",
+      "displayName": "order_details",
+      "layout": [
+        {
+          "widget": {
+            "name": "a00d8320",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "237df8bc",
+                  "fields": [
+                    {
+                      "name": "countdistinct(o_orderkey)",
+                      "expression": "COUNT(DISTINCT `o_orderkey`)"
+                    },
+                    {
+                      "name": "n_name",
+                      "expression": "`n_name`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "countdistinct(o_orderkey)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Count of Unique o_orderkey"
+                },
+                "color": {
+                  "fieldName": "n_name",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "n_name"
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "title": "Distinct Orders by Nation",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "a03991b9",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "237df8bc",
+                  "fields": [
+                    {
+                      "name": "r_name",
+                      "expression": "`r_name`"
+                    },
+                    {
+                      "name": "yearly(o_orderdate)",
+                      "expression": "DATE_TRUNC(\"YEAR\", `o_orderdate`)"
+                    },
+                    {
+                      "name": "countdistinct(o_orderkey)",
+                      "expression": "COUNT(DISTINCT `o_orderkey`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "yearly(o_orderdate)",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "o_orderdate"
+                },
+                "y": {
+                  "fieldName": "countdistinct(o_orderkey)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Count of Unique o_orderkey"
+                },
+                "color": {
+                  "fieldName": "r_name",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "r_name"
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "title": "Order By year",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 2,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "c6c0d6e1",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "237df8bc",
+                  "fields": [
+                    {
+                      "name": "o_orderdate",
+                      "expression": "`o_orderdate`"
+                    },
+                    {
+                      "name": "n_name",
+                      "expression": "`n_name`"
+                    },
+                    {
+                      "name": "l_orderkey",
+                      "expression": "`l_orderkey`"
+                    },
+                    {
+                      "name": "l_partkey",
+                      "expression": "`l_partkey`"
+                    },
+                    {
+                      "name": "l_suppkey",
+                      "expression": "`l_suppkey`"
+                    },
+                    {
+                      "name": "l_quantity",
+                      "expression": "`l_quantity`"
+                    },
+                    {
+                      "name": "l_extendedprice",
+                      "expression": "`l_extendedprice`"
+                    },
+                    {
+                      "name": "l_discount",
+                      "expression": "`l_discount`"
+                    },
+                    {
+                      "name": "l_tax",
+                      "expression": "`l_tax`"
+                    },
+                    {
+                      "name": "l_shipdate",
+                      "expression": "`l_shipdate`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "o_orderdate",
+                    "dateTimeFormat": "DD/MM/YYYY",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "date",
+                    "displayAs": "datetime",
+                    "visible": true,
+                    "order": 17,
+                    "title": "o_orderdate",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "o_orderdate"
+                  },
+                  {
+                    "fieldName": "n_name",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 26,
+                    "title": "n_name",
+                    "allowSearch": true,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "n_name"
+                  },
+                  {
+                    "fieldName": "l_orderkey",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 32,
+                    "title": "l_orderkey",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "l_orderkey"
+                  },
+                  {
+                    "fieldName": "l_partkey",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 33,
+                    "title": "l_partkey",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "l_partkey"
+                  },
+                  {
+                    "fieldName": "l_suppkey",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 34,
+                    "title": "l_suppkey",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "l_suppkey"
+                  },
+                  {
+                    "fieldName": "l_quantity",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "decimal",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 35,
+                    "title": "l_quantity",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "l_quantity"
+                  },
+                  {
+                    "fieldName": "l_extendedprice",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "decimal",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 36,
+                    "title": "l_extendedprice",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "l_extendedprice"
+                  },
+                  {
+                    "fieldName": "l_discount",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "decimal",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 37,
+                    "title": "l_discount",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "l_discount"
+                  },
+                  {
+                    "fieldName": "l_tax",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "decimal",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 38,
+                    "title": "l_tax",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "l_tax"
+                  },
+                  {
+                    "fieldName": "l_shipdate",
+                    "dateTimeFormat": "DD/MM/YYYY",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "date",
+                    "displayAs": "datetime",
+                    "visible": true,
+                    "order": 39,
+                    "title": "l_shipdate",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "l_shipdate"
+                  }
+                ]
+              },
+              "invisibleColumns": [
+                {
+                  "numberFormat": "0",
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "c_custkey",
+                  "type": "integer",
+                  "displayAs": "number",
+                  "order": 0,
+                  "title": "c_custkey",
+                  "allowSearch": false,
+                  "alignContent": "right",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "c_name",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 1,
+                  "title": "c_name",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "c_address",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 2,
+                  "title": "c_address",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "numberFormat": "0",
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "l_linenumber",
+                  "type": "integer",
+                  "displayAs": "number",
+                  "order": 3,
+                  "title": "l_linenumber",
+                  "allowSearch": false,
+                  "alignContent": "right",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "numberFormat": "0",
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "c_nationkey",
+                  "type": "integer",
+                  "displayAs": "number",
+                  "order": 4,
+                  "title": "c_nationkey",
+                  "allowSearch": false,
+                  "alignContent": "right",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "c_phone",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 5,
+                  "title": "c_phone",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "c_acctbal",
+                  "type": "decimal",
+                  "displayAs": "number",
+                  "order": 6,
+                  "title": "c_acctbal",
+                  "allowSearch": false,
+                  "alignContent": "right",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "c_mktsegment",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 7,
+                  "title": "c_mktsegment",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "c_comment",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 8,
+                  "title": "c_comment",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "l_returnflag",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 9,
+                  "title": "l_returnflag",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "numberFormat": "0",
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "o_orderkey",
+                  "type": "integer",
+                  "displayAs": "number",
+                  "order": 10,
+                  "title": "o_orderkey",
+                  "allowSearch": false,
+                  "alignContent": "right",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "l_linestatus",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 11,
+                  "title": "l_linestatus",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "numberFormat": "0",
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "o_custkey",
+                  "type": "integer",
+                  "displayAs": "number",
+                  "order": 12,
+                  "title": "o_custkey",
+                  "allowSearch": false,
+                  "alignContent": "right",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "o_orderstatus",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 13,
+                  "title": "o_orderstatus",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "dateTimeFormat": "DD/MM/YYYY",
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "l_commitdate",
+                  "type": "date",
+                  "displayAs": "datetime",
+                  "order": 14,
+                  "title": "l_commitdate",
+                  "allowSearch": false,
+                  "alignContent": "right",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "o_totalprice",
+                  "type": "decimal",
+                  "displayAs": "number",
+                  "order": 15,
+                  "title": "o_totalprice",
+                  "allowSearch": false,
+                  "alignContent": "right",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "dateTimeFormat": "DD/MM/YYYY",
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "l_receiptdate",
+                  "type": "date",
+                  "displayAs": "datetime",
+                  "order": 16,
+                  "title": "l_receiptdate",
+                  "allowSearch": false,
+                  "alignContent": "right",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "l_shipinstruct",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 18,
+                  "title": "l_shipinstruct",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "o_orderpriority",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 19,
+                  "title": "o_orderpriority",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "l_shipmode",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 20,
+                  "title": "l_shipmode",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "o_clerk",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 21,
+                  "title": "o_clerk",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "l_comment",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 22,
+                  "title": "l_comment",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "numberFormat": "0",
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "o_shippriority",
+                  "type": "integer",
+                  "displayAs": "number",
+                  "order": 23,
+                  "title": "o_shippriority",
+                  "allowSearch": false,
+                  "alignContent": "right",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "o_comment",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 24,
+                  "title": "o_comment",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "numberFormat": "0",
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "n_nationkey",
+                  "type": "integer",
+                  "displayAs": "number",
+                  "order": 25,
+                  "title": "n_nationkey",
+                  "allowSearch": false,
+                  "alignContent": "right",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "numberFormat": "0",
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "n_regionkey",
+                  "type": "integer",
+                  "displayAs": "number",
+                  "order": 27,
+                  "title": "n_regionkey",
+                  "allowSearch": false,
+                  "alignContent": "right",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "n_comment",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 28,
+                  "title": "n_comment",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "numberFormat": "0",
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "r_regionkey",
+                  "type": "integer",
+                  "displayAs": "number",
+                  "order": 29,
+                  "title": "r_regionkey",
+                  "allowSearch": false,
+                  "alignContent": "right",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "r_name",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 30,
+                  "title": "r_name",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "r_comment",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 31,
+                  "title": "r_comment",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "dateTimeFormat": "DD/MM/YYYY HH:mm:ss.SSS",
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "drilldown_grain",
+                  "type": "datetime",
+                  "displayAs": "datetime",
+                  "order": 40,
+                  "title": "drilldown_grain",
+                  "allowSearch": false,
+                  "alignContent": "right",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                }
+              ],
+              "allowHTMLByDefault": false,
+              "itemsPerPage": 25,
+              "paginationSize": "default",
+              "condensed": true,
+              "withRowNumber": false,
+              "frame": {
+                "title": "Order Summary Table",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 14,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "8f08e226",
+            "queries": [
+              {
+                "name": "dashboards/01f07b7e001e1f2fb2a38e189faadbed/datasets/01f07b86f2c01224939231f943dfa0e7_r_name",
+                "query": {
+                  "datasetName": "237df8bc",
+                  "fields": [
+                    {
+                      "name": "r_name",
+                      "expression": "`r_name`"
+                    },
+                    {
+                      "name": "r_name_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "r_name",
+                    "displayName": "r_name",
+                    "queryName": "dashboards/01f07b7e001e1f2fb2a38e189faadbed/datasets/01f07b86f2c01224939231f943dfa0e7_r_name"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "b8eeae78",
+            "queries": [
+              {
+                "name": "dashboards/01f07b7e001e1f2fb2a38e189faadbed/datasets/01f07b86f2c01224939231f943dfa0e7_n_name",
+                "query": {
+                  "datasetName": "237df8bc",
+                  "fields": [
+                    {
+                      "name": "n_name",
+                      "expression": "`n_name`"
+                    },
+                    {
+                      "name": "n_name_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "n_name",
+                    "displayName": "n_name",
+                    "queryName": "dashboards/01f07b7e001e1f2fb2a38e189faadbed/datasets/01f07b86f2c01224939231f943dfa0e7_n_name"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "0d7cfdc0",
+            "queries": [
+              {
+                "name": "dashboards/01f07b7e001e1f2fb2a38e189faadbed/datasets/01f07b86f2c01224939231f943dfa0e7_order_year",
+                "query": {
+                  "datasetName": "237df8bc",
+                  "fields": [
+                    {
+                      "name": "order_year",
+                      "expression": "`order_year`"
+                    },
+                    {
+                      "name": "order_year_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "order_year",
+                    "displayName": "order_year",
+                    "queryName": "dashboards/01f07b7e001e1f2fb2a38e189faadbed/datasets/01f07b86f2c01224939231f943dfa0e7_order_year"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "c103f04d",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "237df8bc",
+                  "fields": [
+                    {
+                      "name": "r_name",
+                      "expression": "`r_name`"
+                    },
+                    {
+                      "name": "n_name",
+                      "expression": "`n_name`"
+                    },
+                    {
+                      "name": "monthly(o_orderdate)",
+                      "expression": "DATE_TRUNC(\"MONTH\", `o_orderdate`)"
+                    },
+                    {
+                      "name": "measure(Revenue Total)",
+                      "expression": "MEASURE(`Revenue Total`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "`n_name` IN (`n_name`) OR TRUE"
+                    },
+                    {
+                      "expression": "`r_name` IN (`r_name`) OR TRUE"
+                    },
+                    {
+                      "expression": "`order_year` IN (`order_year`) OR TRUE"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "monthly(o_orderdate)",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "o_orderdate"
+                },
+                "y": {
+                  "fieldName": "measure(Revenue Total)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Revenue Total"
+                },
+                "color": {
+                  "fieldName": "r_name",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "r_name"
+                },
+                "extra": [
+                  {
+                    "fieldName": "n_name",
+                    "displayName": "n_name"
+                  }
+                ]
+              },
+              "frame": {
+                "title": "Monthly Revenue",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 8,
+            "width": 6,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    }
+  }
+}
