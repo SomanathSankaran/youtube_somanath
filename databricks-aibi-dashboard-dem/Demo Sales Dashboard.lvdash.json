@@ -79,7 +79,7 @@
       "displayName": "Country Revenue from Customer Orders",
       "queryLines": [
         "SELECT \r\n",
-        " initcap(lower( n.n_name)) AS country,\r\n",
+        " initcap(lower( n.n_name)) AS country,country as country_orig,\r\n",
         "  SUM(l.l_extendedprice * (1 - l.l_discount)) AS revenue,\r\n",
         "  count(distinct c_custkey) as customers,\r\n",
         "  count(distinct l_suppkey) as suppliers\r\n",
@@ -140,6 +140,20 @@
       "queryLines": [
         "SELECT * FROM workspace.default.year_list"
       ]
+    },
+    {
+      "name": "06bd9a2e",
+      "displayName": "forecast_daily_calendar_imperial",
+      "queryLines": [
+        "SELECT * FROM samples.accuweather.forecast_daily_calendar_imperial"
+      ]
+    },
+    {
+      "name": "2664ab0b",
+      "displayName": "forecast_daily_calendar_metric",
+      "queryLines": [
+        "SELECT * FROM samples.accuweather.forecast_daily_calendar_metric"
+      ]
     }
   ],
   "pages": [
@@ -176,13 +190,15 @@
               },
               "frame": {
                 "showTitle": true,
-                "title": "Total Orders"
+                "title": "Total Orders",
+                "showDescription": true,
+                "description": "Total Description"
               }
             }
           },
           "position": {
             "x": 0,
-            "y": 0,
+            "y": 2,
             "width": 2,
             "height": 3
           }
@@ -223,7 +239,7 @@
           },
           "position": {
             "x": 2,
-            "y": 0,
+            "y": 2,
             "width": 1,
             "height": 3
           }
@@ -264,7 +280,7 @@
           },
           "position": {
             "x": 3,
-            "y": 0,
+            "y": 2,
             "width": 1,
             "height": 3
           }
@@ -305,7 +321,7 @@
           },
           "position": {
             "x": 4,
-            "y": 0,
+            "y": 2,
             "width": 1,
             "height": 3
           }
@@ -346,7 +362,7 @@
           },
           "position": {
             "x": 5,
-            "y": 0,
+            "y": 2,
             "width": 1,
             "height": 3
           }
@@ -448,7 +464,7 @@
           },
           "position": {
             "x": 0,
-            "y": 3,
+            "y": 5,
             "width": 3,
             "height": 6
           }
@@ -558,7 +574,7 @@
           },
           "position": {
             "x": 3,
-            "y": 3,
+            "y": 5,
             "width": 3,
             "height": 6
           }
@@ -621,6 +637,9 @@
                     "type": "categorical"
                   },
                   "displayName": "n_name"
+                },
+                "label": {
+                  "show": false
                 }
               },
               "frame": {
@@ -631,7 +650,7 @@
           },
           "position": {
             "x": 0,
-            "y": 9,
+            "y": 11,
             "width": 3,
             "height": 6
           }
@@ -702,6 +721,9 @@
                   },
                   "displayName": "r_name"
                 },
+                "label": {
+                  "show": true
+                },
                 "extra": [
                   {
                     "fieldName": "n_name",
@@ -717,9 +739,34 @@
           },
           "position": {
             "x": 3,
-            "y": 9,
+            "y": 11,
             "width": 3,
             "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "cd922e19",
+            "multilineTextboxSpec": {
+              "lines": [
+                "## Sales Dashboard Summary\n",
+                "\n",
+                "This dashboard provides an overview of sales performance across regions and products. Key metrics include total sales, sales growth, and top-performing categories. Use the visualizations to identify trends, track targets, and make data-driven decisions.\n",
+                "\n",
+                "### Highlights\n",
+                "- Total sales by month\n",
+                "- Regional sales comparison\n",
+                "- Top 5 products by revenue\n",
+                "\n",
+                "![Monthly Sales Chart](data:image/jpeg;base64,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)\n"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 2
           }
         }
       ],
@@ -869,6 +916,10 @@
                   "datasetName": "237df8bc",
                   "fields": [
                     {
+                      "name": "c_custkey",
+                      "expression": "`c_custkey`"
+                    },
+                    {
                       "name": "o_orderdate",
                       "expression": "`o_orderdate`"
                     },
@@ -918,6 +969,34 @@
               "widgetType": "table",
               "encodings": {
                 "columns": [
+                  {
+                    "fieldName": "c_custkey",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": false,
+                    "order": 0,
+                    "title": "c_custkey",
+                    "allowSearch": true,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "c_custkey"
+                  },
                   {
                     "fieldName": "o_orderdate",
                     "dateTimeFormat": "DD/MM/YYYY",
@@ -1196,32 +1275,6 @@
                 ]
               },
               "invisibleColumns": [
-                {
-                  "numberFormat": "0",
-                  "booleanValues": [
-                    "false",
-                    "true"
-                  ],
-                  "imageUrlTemplate": "{{ @ }}",
-                  "imageTitleTemplate": "{{ @ }}",
-                  "imageWidth": "",
-                  "imageHeight": "",
-                  "linkUrlTemplate": "{{ @ }}",
-                  "linkTextTemplate": "{{ @ }}",
-                  "linkTitleTemplate": "{{ @ }}",
-                  "linkOpenInNewTab": true,
-                  "name": "c_custkey",
-                  "type": "integer",
-                  "displayAs": "number",
-                  "order": 0,
-                  "title": "c_custkey",
-                  "allowSearch": false,
-                  "alignContent": "right",
-                  "allowHTML": false,
-                  "highlightLinks": false,
-                  "useMonospaceFont": false,
-                  "preserveWhitespace": false
-                },
                 {
                   "booleanValues": [
                     "false",
@@ -1958,7 +2011,7 @@
                   "preserveWhitespace": false
                 },
                 {
-                  "dateTimeFormat": "DD/MM/YYYY HH:mm:ss.SSS",
+                  "numberFormat": "0",
                   "booleanValues": [
                     "false",
                     "true"
@@ -1971,11 +2024,11 @@
                   "linkTextTemplate": "{{ @ }}",
                   "linkTitleTemplate": "{{ @ }}",
                   "linkOpenInNewTab": true,
-                  "name": "drilldown_grain",
-                  "type": "datetime",
-                  "displayAs": "datetime",
+                  "name": "order_year",
+                  "type": "integer",
+                  "displayAs": "number",
                   "order": 40,
-                  "title": "drilldown_grain",
+                  "title": "order_year",
                   "allowSearch": false,
                   "alignContent": "right",
                   "allowHTML": false,
@@ -2231,8 +2284,25 @@
     }
   ],
   "uiSettings": {
+    "locale": "en-US",
     "theme": {
-      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+      "canvasBackgroundColor": {
+        "light": "#FAFAFB",
+        "dark": "#1F272D"
+      },
+      "widgetBackgroundColor": {
+        "light": "#FFFFFF",
+        "dark": "#11171C"
+      },
+      "fontColor": {
+        "light": "#11171C",
+        "dark": "#E8ECF0"
+      },
+      "selectionColor": {
+        "light": "#22B457",
+        "dark": "#8ACAFF"
+      },
+      "widgetHeaderAlignment": "CENTER"
     }
   }
 }
