@@ -17,7 +17,7 @@ resources:
       tasks:
         - task_key: notebook_task
           notebook_task:
-            notebook_path: ../src/notebook.ipynb
+            notebook_path: ${workspace.root_path}/files/src/notebook.ipynb
       parameters:
         - name: input
-          default: "workspace.dab_dev.test_table"
+          default: "workspace.dab_{workspace.target}.test_table"
