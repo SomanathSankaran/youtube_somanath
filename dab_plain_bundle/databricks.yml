@@ -9,7 +9,10 @@ run_as:
 include:
   - resources/*.yml
   - resources/*/*.yml
-
+variables:
+      test_variable:
+        description: "A test variable for dev"
+        default: default_value
 targets:
   dev:
     # The default target uses 'mode: development' to create a development copy.
@@ -31,10 +34,7 @@ targets:
       tags:
         env: development
         project: youtube_somanath
-    variables:
-      test_variable:
-        description: "A test variable for dev"
-        default: "default_value"
+    
 
 
       

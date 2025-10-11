@@ -22,4 +22,4 @@ resources:
         - name: input
           default: "workspace.dab_${bundle.target}.test_table"
         - name: test_variable
-          default: ${variables.test_variable}"
+          default: ${var.test_variable}
