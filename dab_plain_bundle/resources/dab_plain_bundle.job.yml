@@ -20,4 +20,6 @@ resources:
             notebook_path: ../src/notebook.ipynb
       parameters:
         - name: input
-          default: "workspace.dab_${workspace.target}.test_table"
+          default: "workspace.dab_${bundle.target}.test_table"
+        - name: test_variable
+          default: ${variables.test_variable}"

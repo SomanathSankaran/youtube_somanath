@@ -31,6 +31,10 @@ targets:
       tags:
         env: development
         project: youtube_somanath
+    variables:
+      test_variable:
+        description: "A test variable for dev"
+        default: "default_value"
 
 
       
@@ -50,3 +54,6 @@ targets:
       tags:
         env: production
         project: youtube_somanath
+    variables:
+      test_variable:
+        description: "A test variable for prod"
