@@ -28,6 +28,8 @@ jobs:
       # See https://github.com/databricks/setup-cli
       - uses: databricks/setup-cli@main
 
+      - name: List files
+        run: ls -la;pwd;  
       # Deploy the bundle to the "dev" target as defined
       # in the bundle's settings file.
       - run: databricks bundle deploy
