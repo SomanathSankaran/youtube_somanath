@@ -15,10 +15,11 @@ jobs:
   # Used by the "pipeline_update" job to deploy the bundle.
   # Bundle validation is automatically performed as part of this deployment.
   # If validation fails, this workflow fails.
+  
   deploy:
     name: 'Deploy bundle'
     runs-on: ubuntu-latest
-
+    environment: production  
     steps:
       # Check out this repo, so that this workflow can access it.
       - uses: actions/checkout@v3
@@ -39,7 +40,7 @@ jobs:
   pipeline_update:
     name: 'Run pipeline update'
     runs-on: ubuntu-latest
-
+    environment: production  
     # Run the "deploy" job first.
     needs:
       - deploy
