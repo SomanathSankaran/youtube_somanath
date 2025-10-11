@@ -32,7 +32,7 @@ jobs:
         run: cd dab_plain_bundle && ls -la 
       # Deploy the bundle to the "dev" target as defined
       # in the bundle's settings file.
-      - run: databricks bundle deploy
+      - run: databricks bundle deploy --var="test_variable=substituted from CLI"
         working-directory: dab_plain_bundle
         env:
           DATABRICKS_TOKEN: ${{ secrets.SP_TOKEN }}
