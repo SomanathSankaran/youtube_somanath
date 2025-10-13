@@ -1,0 +1,93 @@
+resources:
+  jobs:
+    data_loader:
+      name: data_loader
+      tasks:
+        - task_key: lookup_activity
+          email_notifications: {}
+          run_if: ALL_SUCCESS
+          sql_task:
+            query:
+              query_id: 11b36610-2a44-4ff1-8c2e-975a240acd69
+            warehouse_id: 3121653354cd7544
+          webhook_notifications: {}
+        - task_key: data_loader_loop
+          depends_on:
+            - task_key: lookup_activity
+          email_notifications: {}
+          for_each_task:
+            concurrency: 3
+            inputs: '{{tasks.lookup_activity.output.rows}}'
+            task:
+              disable_auto_optimization: true
+              email_notifications: {}
+              health:
+                rules:
+                  - metric: RUN_DURATION_SECONDS
+                    op: GREATER_THAN
+                    value: 15
+              min_retry_interval_millis: 900000
+              notebook_task:
+                base_parameters:
+                  src_table: '{{input.src_table}}'
+                  tgt_table: '{{input.tgt_table}}'
+                notebook_path: /Workspace/Users/somanathsankaran@gmail.com/youtube_somanath/databricks_workflows/ETL/driver
+                source: WORKSPACE
+              notification_settings: {}
+              run_if: ALL_SUCCESS
+              task_key: dat_loader_iteration
+              webhook_notifications: {}
+          run_if: ALL_SUCCESS
+          webhook_notifications: {}
+        - task_key: update_failure_audit
+          depends_on:
+            - task_key: data_loader_loop
+          disable_auto_optimization: true
+          email_notifications: {}
+          min_retry_interval_millis: 900000
+          notebook_task:
+            base_parameters:
+              job_params: jobs/{{job.id}}/runs/{{job.run_id}}
+              job_start_time: '{{job.start_time.iso_datetime}}'
+              start_time: '{{job.start_time.iso_datetime}}'
+              status: FAILED
+              triggered_time: '{{job.trigger.time.iso_datetime}}'
+              usecase_id: '{{tasks.lookup_activity.output.first_row.usecase_id}}'
+              workspace_id: '{{workspace.id}}'
+              workspace_url: '{{workspace.url}}'
+            notebook_path: ..\src\insert_audit.ipynb
+            source: WORKSPACE
+          run_if: AT_LEAST_ONE_FAILED
+          webhook_notifications: {}
+        - task_key: update_success_audit
+          depends_on:
+            - task_key: data_loader_loop
+          email_notifications: {}
+          notebook_task:
+            base_parameters:
+              job_params: jobs/{{job.id}}/runs/{{job.run_id}}
+              job_start_time: '{{job.start_time.iso_datetime}}'
+              start_time: '{{job.start_time.iso_datetime}}'
+              status: SUCCESS
+              triggered_time: '{{job.trigger.time.iso_datetime}}'
+              usecase_id: '{{tasks.lookup_activity.output.first_row.usecase_id}}'
+              workspace_id: '{{workspace.id}}'
+              workspace_url: '{{workspace.url}}'
+            notebook_path: ..\src\insert_audit.ipynb
+            source: WORKSPACE
+          run_if: ALL_SUCCESS
+          webhook_notifications: {}
+      parameters:
+        - name: test_param
+          default: test_param
+      email_notifications: {}
+      max_concurrent_runs: 1
+      performance_target: PERFORMANCE_OPTIMIZED
+      queue:
+        enabled: true
+      tags:
+        "dev": "somanathsankaran2"
+        "env": "development"
+        "project": "youtube_somanath"
+        "usecase": "dev"
+      webhook_notifications: {}
