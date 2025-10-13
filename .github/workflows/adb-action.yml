@@ -29,11 +29,11 @@ jobs:
       - uses: databricks/setup-cli@main
 
       - name: List files
-        run: cd dab_plain_bundle && ls -la 
+        run: cd dab_demo_yt && ls -la 
       # Deploy the bundle to the "dev" target as defined
       # in the bundle's settings file.
       - run: databricks bundle deploy --var="test_variable=substituted from CLI"
-        working-directory: dab_plain_bundle
+        working-directory: dab_demo_yt
         env:
           DATABRICKS_TOKEN: ${{ secrets.SP_TOKEN }}
           DATABRICKS_BUNDLE_ENV: prod
@@ -56,8 +56,8 @@ jobs:
 
       # Run the Databricks workflow named "my-job" as defined in the
       # bundle that was just deployed.
-      - run: databricks bundle run dab_plain_bundle_job
-        working-directory: dab_plain_bundle
+      - run: databricks bundle run dab_demo_yt_job
+        working-directory: dab_demo_yt
         env:
           DATABRICKS_TOKEN: ${{ secrets.SP_TOKEN }}
           DATABRICKS_BUNDLE_ENV: prod
